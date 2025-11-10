@@ -1,0 +1,14 @@
+{
+  "name": "com.healyoung.MultipleAdvertisingIDs",
+  "version": "1.0.0",
+  "displayName": "MultipleAdvertisingIDs",
+  "description": "A short description of the package.",
+  "unity": "2022.3.62",
+  "keywords": ["tool","utility"],
+  "author": {
+    "name": "healyoung",
+    "email": "378494554@qq.com",
+    "url": "https://github.com/healyoung/Multiple-Advertising-IDs.git"
+  },
+  "dependencies": {}
+}
