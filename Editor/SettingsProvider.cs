@@ -18,7 +18,15 @@ public class AdvertisingIDsSettingsProvider : SettingsProvider
 
     private static bool IsSettingsAvailable()
     {
-        return File.Exists(SettingsPath);
+        if (!File.Exists(SettingsPath))
+        {
+           var settings = ScriptableObject.CreateInstance<AdvertisingIDsSettings>();
+           AssetDatabase.CreateAsset(settings, SettingsPath);
+           AssetDatabase.SaveAssets();
+           AssetDatabase.Refresh();
+        }
+        
+        return true;
     }
 
     public override void OnActivate(string searchContext, VisualElement rootElement)
@@ -31,7 +39,8 @@ public class AdvertisingIDsSettingsProvider : SettingsProvider
     {
         base.OnGUI(searchContext);
         using var changeCheckScope = new EditorGUI.ChangeCheckScope();
-        EditorGUILayout.PropertyField(_customSettings.FindProperty("globalSettings"));
+        EditorGUILayout.PropertyField(_customSettings.FindProperty("bannerIds"));
+        EditorGUILayout.PropertyField(_customSettings.FindProperty("interstitialIds"));
         EditorGUILayout.Space(20);
         if (!changeCheckScope.changed) return;
         _customSettings.ApplyModifiedPropertiesWithoutUndo();

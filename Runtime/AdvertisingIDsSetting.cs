@@ -5,11 +5,13 @@ using UnityEngine;
 
 namespace WhiteEngine
 {
-    [CreateAssetMenu(fileName = "AdvertisingIDsSettings", menuName = "AdvertisingIDsSettings")]
     public class AdvertisingIDsSettings : ScriptableObject
     {
-        public List<string> bannerIds = new List<string>();
-        public List<string> interstitialIds = new List<string>();
+        [Header("横幅广告ID")] [SerializeField] public List<string> bannerIds = new List<string>();
+        
+        [Header("插屏广告ID")] [SerializeField] public List<string> interstitialIds = new List<string>();
+
+
         public readonly LoginDayCounter DayCounter = new LoginDayCounter();
 
         private List<string> GetIDsByDay(AdvertingType advertingType)
