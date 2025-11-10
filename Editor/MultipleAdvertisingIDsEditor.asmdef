@@ -1,0 +1,16 @@
+{
+    "name": "MultipleAdvertisingIDsEditor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:45c2ef21fbd53e0479cf4ca700ddfdcd"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
