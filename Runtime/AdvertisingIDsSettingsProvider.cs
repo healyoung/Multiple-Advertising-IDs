@@ -27,7 +27,7 @@ public static class SettingsUtils
         }
     }
 
-    [InitializeOnLoadMethod]
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     public static void LoadAdvertisingIDsSetting()
     {
         _globalSettings = GetSingletonAssetsByResources<AdvertisingIDsSettings>(GlobalSettingsPath);
@@ -38,27 +38,25 @@ public static class SettingsUtils
         _globalSettings.IntervalM = new StorageProperty<int>("Interstitial_IntervalM", 3);
         _globalSettings.IntervalN = new StorageProperty<int>("Banner_IntervalN", 3);
 
-        _globalSettings.IntervalMTimer = new StorageProperty<int>($"Interstitial_{_globalSettings.DayCounter.LoginDay.Value}_IntervalMTimer", 0);
-        _globalSettings.IntervalNTimer = new StorageProperty<int>($"Banner_{_globalSettings.DayCounter.LoginDay.Value}_IntervalNTimer", 0);
+        _globalSettings.IntervalMTimer = new StorageProperty<int>($"Interstitial_{_globalSettings.DayCounter.LoginDay.Value}_IntervalMTimer", -1);
+        _globalSettings.IntervalNTimer = new StorageProperty<int>($"Banner_{_globalSettings.DayCounter.LoginDay.Value}_IntervalNTimer", -1);
     }
 
     public static void SetRemoteData()
     {
-#if FIREBASE_REMOTE_CONFIG
-        _globalSettings.IntervalM.Value = (int)Firebase.RemoteConfig.FirebaseRemoteConfig.DefaultInstance.GetValue("Interstitial_IntervalM").LongValue;
-        _globalSettings.IntervalN.Value = (int)Firebase.RemoteConfig.FirebaseRemoteConfig.DefaultInstance.GetValue("Banner_IntervalN").LongValue;
-        var bannerJson = Firebase.RemoteConfig.FirebaseRemoteConfig.DefaultInstance.GetValue("All_Banner_AdvertisingID").StringValue;
-        var interstitialJson = Firebase.RemoteConfig.FirebaseRemoteConfig.DefaultInstance.GetValue("All_Interstitial_AdvertisingID").StringValue;
+        _globalSettings.IntervalM.Value = (int)Firebase.RemoteConfig.FirebaseRemoteConfig.DefaultInstance.GetValue(_globalSettings.remoteInterstitialInterval).LongValue;
+        _globalSettings.IntervalN.Value = (int)Firebase.RemoteConfig.FirebaseRemoteConfig.DefaultInstance.GetValue(_globalSettings.remoteBannerInterval).LongValue;
+        var bannerJson = Firebase.RemoteConfig.FirebaseRemoteConfig.DefaultInstance.GetValue(_globalSettings.allBannerIds).StringValue;
+        var interstitialJson = Firebase.RemoteConfig.FirebaseRemoteConfig.DefaultInstance.GetValue(_globalSettings.allInterstitialIds).StringValue;
         if (!string.IsNullOrEmpty(bannerJson))
         {
             _globalSettings.bannerIds = JsonUtility.FromJson<List<string>>(bannerJson);
         }
-        
+
         if (!string.IsNullOrEmpty(interstitialJson))
         {
             _globalSettings.interstitialIds = JsonUtility.FromJson<List<string>>(interstitialJson);
         }
-#endif
     }
 
 #if UNITY_EDITOR

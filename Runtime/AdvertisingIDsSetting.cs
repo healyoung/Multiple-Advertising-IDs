@@ -1,24 +1,31 @@
 using System;
 using System.Collections.Generic;
 using HealYoung;
+using Unity.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace WhiteEngine
 {
     public class AdvertisingIDsSettings : ScriptableObject
     {
+        
+        [Header("要求云控使用的每日横幅广告ID的间隔")][SerializeField, ReadOnly] public string remoteBannerInterval = "remote_banner_interval";
+        [Header("要求云控使用的每日插屏广告ID的间隔")] [SerializeField, ReadOnly] public string remoteInterstitialInterval = "remote_interstitial_interval";
+        [Header("要求云控使用的所有插屏广告ID")] [SerializeField, ReadOnly] public string allInterstitialIds = "all_interstitial_ids";
+        [Header("要求云控使用的所有横幅广告ID")] [SerializeField, ReadOnly] public string allBannerIds = "all_banner_ids";
+        
         [Header("横幅广告ID")] [SerializeField] public List<string> bannerIds = new List<string>();
         
         [Header("插屏广告ID")] [SerializeField] public List<string> interstitialIds = new List<string>();
-
-
+        
         public readonly LoginDayCounter DayCounter = new LoginDayCounter();
 
         private List<string> GetIDsByDay(AdvertingType advertingType)
         {
             List<string> result = new List<string>();
-            int index = DayCounter.LoginDay.Value - 1;
-            index = Mathf.Clamp(index, 0, 3);
+            int index = DayCounter.LoginDay.Value;
+            index = Mathf.Clamp(index, 1, 4);
             int start = index * 2 - 2;
             int end = index * 2;
             switch (advertingType)
@@ -72,6 +79,12 @@ namespace WhiteEngine
         public IBindableProperty<int> IntervalNTimer;
 
         public IBindableProperty<int> IntervalMTimer;
+    }
+
+    public class Day
+    {
+        public string BannerId;
+        public string InterstitialId;
     }
 
     public enum AdvertingType

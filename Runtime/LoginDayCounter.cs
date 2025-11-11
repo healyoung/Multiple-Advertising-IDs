@@ -19,6 +19,7 @@ public class LoginDayCounter
             LoginDay.Value++;
         }
 
+        Debug.Log($"Login Day is {LoginDay.Value}");
         LastLoginTime.Value = ConvertDateTimeToTimeStamp(DateTime.Now);
     }
     
