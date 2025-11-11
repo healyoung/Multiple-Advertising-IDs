@@ -39,6 +39,10 @@ public class AdvertisingIDsSettingsProvider : SettingsProvider
     {
         base.OnGUI(searchContext);
         using var changeCheckScope = new EditorGUI.ChangeCheckScope();
+        EditorGUILayout.PropertyField(_customSettings.FindProperty("remoteBannerInterval"));
+        EditorGUILayout.PropertyField(_customSettings.FindProperty("remoteInterstitialInterval"));
+        EditorGUILayout.PropertyField(_customSettings.FindProperty("allInterstitialIds"));
+        EditorGUILayout.PropertyField(_customSettings.FindProperty("allBannerIds"));
         EditorGUILayout.PropertyField(_customSettings.FindProperty("bannerIds"));
         EditorGUILayout.PropertyField(_customSettings.FindProperty("interstitialIds"));
         EditorGUILayout.Space(20);
