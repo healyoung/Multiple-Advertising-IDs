@@ -25,7 +25,8 @@ namespace WhiteEngine
         {
             List<string> result = new List<string>();
             int index = DayCounter.LoginDay.Value;
-            index = Mathf.Clamp(index, 1, 4);
+            int max = (int)(bannerIds.Count/2f);
+            index = Mathf.Clamp(index, 1, max);
             int start = index * 2 - 2;
             int end = index * 2;
             switch (advertingType)
