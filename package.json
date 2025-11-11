@@ -2,7 +2,7 @@
   "name": "com.healyoung.multipleadvertisingids",
   "version": "1.0.0",
   "displayName": "MultipleAdvertisingIDs",
-  "description": "云南山海信息技术有限公司，提供多广告ID获取功能 /n 在firebase的remoteConfig回调中调用 SettingsUtils.SetRemoteData()方法为广告ID赋值 /n 在广告展示时调用 AdvertisingIDsManager.GetAdvertingID()方法获取广告ID",
+  "description": "云南山海信息技术有限公司，提供多广告ID获取功能",
   "unity": "2022.3",
   "keywords": ["tool","utility"],
   "author": {

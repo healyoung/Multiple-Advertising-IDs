@@ -70,6 +70,7 @@ namespace WhiteEngine
             }
 
             List<string> ids = GetIDsByDay(advertingType);
+            Debug.Log($"GetAdvertisingID {advertingType}, {index}, {ids[index]}");
             return ids[index];
         }
 
@@ -80,12 +81,6 @@ namespace WhiteEngine
         public IBindableProperty<int> IntervalNTimer;
 
         public IBindableProperty<int> IntervalMTimer;
-    }
-
-    public class Day
-    {
-        public string BannerId;
-        public string InterstitialId;
     }
 
     public enum AdvertingType
