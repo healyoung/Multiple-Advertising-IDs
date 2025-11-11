@@ -59,11 +59,9 @@ namespace WhiteEngine
             {
                 case AdvertingType.Banner:
                     index = IntervalNTimer.Value >= IntervalN.Value ? 1 : 0;
-                    IntervalNTimer.Value++;
                     break;
                 case AdvertingType.Interstitial:
                     index = IntervalMTimer.Value >= IntervalM.Value ? 1 : 0;
-                    IntervalMTimer.Value++;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(advertingType), advertingType, null);
@@ -72,6 +70,18 @@ namespace WhiteEngine
             List<string> ids = GetIDsByDay(advertingType);
             Debug.Log($"GetAdvertisingID {advertingType}, {index}, {ids[index]}");
             return ids[index];
+        }
+
+        public void ShowAdSucceed(AdvertingType advertingType)
+        {
+            if(advertingType == AdvertingType.Banner)
+            {
+                IntervalNTimer.Value++;
+            }
+            else if(advertingType == AdvertingType.Interstitial)
+            {
+                IntervalMTimer.Value++;
+            }
         }
 
         public IBindableProperty<int> IntervalN;
