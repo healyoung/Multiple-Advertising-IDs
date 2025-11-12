@@ -5,7 +5,7 @@ using UnityEditor;
 using WhiteEngine;
 using UnityEngine;
 
-public static class SettingsUtils
+public static class MultipleAdIds
 {
     private static readonly string GlobalSettingsPath = $"AdvertisingIDsSettings";
     private static AdvertisingIDsSettings _globalSettings;

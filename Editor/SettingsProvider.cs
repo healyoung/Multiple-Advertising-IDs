@@ -13,7 +13,7 @@ public class AdvertisingIDsSettingsProvider : SettingsProvider
 
     private static SerializedObject GetSerializedSettings()
     {
-        return new SerializedObject(SettingsUtils.AdvertisingIDs);
+        return new SerializedObject(MultipleAdIds.AdvertisingIDs);
     }
 
     private static bool IsSettingsAvailable()

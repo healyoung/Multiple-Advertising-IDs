@@ -7,6 +7,8 @@ using UnityEngine.Serialization;
 
 namespace WhiteEngine
 {
+    
+    [CreateAssetMenu( fileName = "AdvertisingIDsSettings", menuName = "Multiple/AdvertisingIDsSettings", order = 1)]
     public class AdvertisingIDsSettings : ScriptableObject
     {
         

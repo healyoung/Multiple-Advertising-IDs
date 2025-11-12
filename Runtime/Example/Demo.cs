@@ -25,37 +25,37 @@ public class Demo : MonoBehaviour
 
     private void Start()
     {
-        currentDay.text = $"第{SettingsUtils.AdvertisingIDs.DayCounter.LoginDay.Value}天";
-        var bannerId = SettingsUtils.AdvertisingIDs.GetAdvertisingID(AdvertingType.Banner);
+        currentDay.text = $"第{MultipleAdIds.AdvertisingIDs.DayCounter.LoginDay.Value}天";
+        var bannerId = MultipleAdIds.AdvertisingIDs.GetAdvertisingID(AdvertingType.Banner);
         currentBanner.text = bannerId;
         
-        var interstitialId = SettingsUtils.AdvertisingIDs.GetAdvertisingID(AdvertingType.Interstitial);
+        var interstitialId = MultipleAdIds.AdvertisingIDs.GetAdvertisingID(AdvertingType.Interstitial);
         currentInterstitial.text = interstitialId;
     }
 
 
     private void NextDay()
     {
-        SettingsUtils.AdvertisingIDs.DayCounter.LoginDay.Value++;
-        SettingsUtils.AdvertisingIDs.IntervalMTimer.Value = 0;
-        SettingsUtils.AdvertisingIDs.IntervalNTimer.Value = 0;
-        currentDay.text = $"第{SettingsUtils.AdvertisingIDs.DayCounter.LoginDay.Value}天";
-        var bannerId = SettingsUtils.AdvertisingIDs.GetAdvertisingID(AdvertingType.Banner);
+        MultipleAdIds.AdvertisingIDs.DayCounter.LoginDay.Value++;
+        MultipleAdIds.AdvertisingIDs.IntervalMTimer.Value = 0;
+        MultipleAdIds.AdvertisingIDs.IntervalNTimer.Value = 0;
+        currentDay.text = $"第{MultipleAdIds.AdvertisingIDs.DayCounter.LoginDay.Value}天";
+        var bannerId = MultipleAdIds.AdvertisingIDs.GetAdvertisingID(AdvertingType.Banner);
         currentBanner.text = bannerId;
         
-        var interstitialId = SettingsUtils.AdvertisingIDs.GetAdvertisingID(AdvertingType.Interstitial);
+        var interstitialId = MultipleAdIds.AdvertisingIDs.GetAdvertisingID(AdvertingType.Interstitial);
         currentInterstitial.text = interstitialId;
     }
     
     private void NextBanner()
     {
-        var bannerId = SettingsUtils.AdvertisingIDs.GetAdvertisingID(AdvertingType.Banner);
+        var bannerId = MultipleAdIds.AdvertisingIDs.GetAdvertisingID(AdvertingType.Banner);
         currentBanner.text = bannerId;
     }
     
     private void NextInterstitial()
     {
-        var interstitialId = SettingsUtils.AdvertisingIDs.GetAdvertisingID(AdvertingType.Interstitial);
+        var interstitialId = MultipleAdIds.AdvertisingIDs.GetAdvertisingID(AdvertingType.Interstitial);
         currentInterstitial.text = interstitialId;
     }
     
