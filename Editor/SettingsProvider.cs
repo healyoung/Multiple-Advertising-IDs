@@ -41,12 +41,28 @@ namespace ShanHai.Editor
         {
             base.OnGUI(searchContext);
             using var changeCheckScope = new EditorGUI.ChangeCheckScope();
-            EditorGUILayout.PropertyField(_customSettings.FindProperty("remoteBannerInterval"));
             EditorGUILayout.PropertyField(_customSettings.FindProperty("remoteInterstitialInterval"));
+            EditorGUILayout.PropertyField(_customSettings.FindProperty("interstitialInterval"));
+            EditorGUILayout.Space(30);
+            EditorGUILayout.PropertyField(_customSettings.FindProperty("remoteBannerInterval"));
+            EditorGUILayout.PropertyField(_customSettings.FindProperty("bannerInterval"));
+            EditorGUILayout.Space(30);
+            EditorGUILayout.PropertyField(_customSettings.FindProperty("remoteInterstitialGroup"));
+            EditorGUILayout.PropertyField(_customSettings.FindProperty("interstitialGroup"));
+            EditorGUILayout.Space(30);
+            EditorGUILayout.PropertyField(_customSettings.FindProperty("remoteBannerGroup"));
+            EditorGUILayout.PropertyField(_customSettings.FindProperty("bannerGroup"));
+            EditorGUILayout.Space(30);
             EditorGUILayout.PropertyField(_customSettings.FindProperty("allInterstitialIds"));
+            EditorGUILayout.PropertyField(_customSettings.FindProperty("interstitialIds"));
+            EditorGUILayout.Space(30);
             EditorGUILayout.PropertyField(_customSettings.FindProperty("allBannerIds"));
             EditorGUILayout.PropertyField(_customSettings.FindProperty("bannerIds"));
-            EditorGUILayout.PropertyField(_customSettings.FindProperty("interstitialIds"));
+
+            
+
+            
+            
             EditorGUILayout.Space(20);
             if (!changeCheckScope.changed) return;
             _customSettings.ApplyModifiedPropertiesWithoutUndo();

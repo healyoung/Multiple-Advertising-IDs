@@ -120,11 +120,11 @@ namespace ShanHai
             DayCounter.LoginDay = new StorageProperty<int>("LoginDayCounter_Day", 0);
             DayCounter.UpdateLastLoginTime();
 
-            _intervalInterstitial = new StorageProperty<int>("Interstitial_IntervalM", 3);
-            _intervalBanner = new StorageProperty<int>("Banner_IntervalN", 3);
+            _intervalInterstitial = new StorageProperty<int>("Interstitial_IntervalM", _iDs.interstitialInterval);
+            _intervalBanner = new StorageProperty<int>("Banner_IntervalN", _iDs.bannerInterval);
 
-            _interstitialGroup = new StorageProperty<int>("Interstitial_InterstitialGroup", 2);
-            _bannerGroup = new StorageProperty<int>("Banner_BannerGroup", 2);
+            _interstitialGroup = new StorageProperty<int>("Interstitial_InterstitialGroup", _iDs.interstitialGroup);
+            _bannerGroup = new StorageProperty<int>("Banner_BannerGroup", _iDs.bannerGroup);
 
             InterstitialTimer = new StorageProperty<int>($"Interstitial_{DayCounter.LoginDay.Value}_IntervalMTimer", 0);
             BannerTimer = new StorageProperty<int>($"Banner_{DayCounter.LoginDay.Value}_IntervalNTimer", 0);
