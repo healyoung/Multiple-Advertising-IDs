@@ -36,7 +36,7 @@ namespace ShanHai
                     _iDs = GetSingletonAssetsByResources<AdvertisingIDsSettings>(GlobalSettingsPath);
                 return _iDs;
 #else
-                return _globalSettings;
+                return _iDs;
 #endif
             }
         }
