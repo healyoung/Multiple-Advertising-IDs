@@ -148,10 +148,10 @@ namespace ShanHai
             var interstitialJson = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.allInterstitialIds).StringValue;
 
             if (!string.IsNullOrEmpty(bannerJson))
-                _iDs.bannerIds = JsonUtility.FromJson<List<string>>(bannerJson);
+                _iDs.bannerIds = JsonUtility.FromJson<StringWper>(bannerJson).list;
 
             if (!string.IsNullOrEmpty(interstitialJson))
-                _iDs.interstitialIds = JsonUtility.FromJson<List<string>>(interstitialJson);
+                _iDs.interstitialIds = JsonUtility.FromJson<StringWper>(interstitialJson).list;
         }
 
         #region Helper
