@@ -138,20 +138,29 @@ namespace ShanHai
 
         public static void SetRemoteData()
         {
-            _intervalInterstitial.Value = (int)FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteInterstitialInterval).LongValue;
-            _intervalBanner.Value = (int)FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteBannerInterval).LongValue;
+            try
+            {
+                _intervalInterstitial.Value = (int)FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteInterstitialInterval).LongValue;
+                _intervalBanner.Value = (int)FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteBannerInterval).LongValue;
 
-            _interstitialGroup.Value = (int)FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteInterstitialGroup).LongValue;
-            _bannerGroup.Value = (int)FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteBannerGroup).LongValue;
+                _interstitialGroup.Value = (int)FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteInterstitialGroup).LongValue;
+                _bannerGroup.Value = (int)FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteBannerGroup).LongValue;
 
-            var bannerJson = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.allBannerIds).StringValue;
-            var interstitialJson = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.allInterstitialIds).StringValue;
+                var bannerJson = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.allBannerIds).StringValue;
+                var interstitialJson = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.allInterstitialIds).StringValue;
 
-            if (!string.IsNullOrEmpty(bannerJson))
-                _iDs.bannerIds = JsonUtility.FromJson<StringWper>(bannerJson).list;
+                if (!string.IsNullOrEmpty(bannerJson))
+                    _iDs.bannerIds = JsonUtility.FromJson<StringWper>(bannerJson).list;
 
-            if (!string.IsNullOrEmpty(interstitialJson))
-                _iDs.interstitialIds = JsonUtility.FromJson<StringWper>(interstitialJson).list;
+                if (!string.IsNullOrEmpty(interstitialJson))
+                    _iDs.interstitialIds = JsonUtility.FromJson<StringWper>(interstitialJson).list;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e.Message);
+                Debug.LogError(e.StackTrace);
+                throw;
+            }
         }
 
         #region Helper
