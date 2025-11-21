@@ -145,15 +145,15 @@ namespace ShanHai
 
                 _interstitialGroup.Value = (int)FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteInterstitialGroup).LongValue;
                 _bannerGroup.Value = (int)FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteBannerGroup).LongValue;
-
-                var bannerJson = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.allBannerIds).StringValue;
+                
                 var interstitialJson = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.allInterstitialIds).StringValue;
-
-                if (!string.IsNullOrEmpty(bannerJson))
-                    _iDs.bannerIds = JsonUtility.FromJson<StringWper>(bannerJson).list;
-
+                Debug.Log(interstitialJson);
                 if (!string.IsNullOrEmpty(interstitialJson))
                     _iDs.interstitialIds = JsonUtility.FromJson<StringWper>(interstitialJson).list;
+                Debug.Log(_iDs.interstitialIds.Count);
+                // var bannerJson = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.allBannerIds).StringValue;
+                // if (!string.IsNullOrEmpty(bannerJson))
+                //     _iDs.bannerIds = JsonUtility.FromJson<StringWper>(bannerJson).list;
             }
             catch (Exception e)
             {
