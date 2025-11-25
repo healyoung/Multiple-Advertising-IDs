@@ -10,5 +10,7 @@
     "email": "378494554@qq.com",
     "url": "https://github.com/healyoung/Multiple-Advertising-IDs.git"
   },
-  "dependencies": {}
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
+  }
 }
