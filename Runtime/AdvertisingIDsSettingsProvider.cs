@@ -33,6 +33,7 @@ namespace ShanHai
                 {
                     _iDs = GetSingletonAssetsByResources<AdvertisingIDsSettings>(GlobalSettingsPath);
                 }
+
                 return _iDs;
 #else
                 return _iDs;
@@ -130,7 +131,6 @@ namespace ShanHai
             BannerTimer = new StorageProperty<int>($"Banner_{DayCounter.LoginDay.Value}_IntervalNTimer_V1.0.0", 0);
 
 
-
             _interstitialCurrentGroup = new StorageProperty<int>($"Interstitial_{DayCounter.LoginDay.Value}_IntervalGroupTimer_V1.0.0", 0);
             _bannerCurrentGroup = new StorageProperty<int>($"Banner_{DayCounter.LoginDay.Value}_IntervalGroupTimer_V1.0.0", 0);
 
@@ -144,22 +144,28 @@ namespace ShanHai
             {
                 if (_iDs.enableInterstitial)
                 {
-                    _intervalInterstitial.Value = (int)FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteInterstitialInterval).LongValue;
-                    _interstitialGroup.Value = (int)FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteInterstitialGroup).LongValue;
-                    var interstitialJson = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.allInterstitialIds).StringValue;
-                    Debug.Log(interstitialJson);
-                    if (!string.IsNullOrEmpty(interstitialJson))
-                        _iDs.interstitialIds = JsonUtility.FromJson<StringWper>(interstitialJson).list;
+                    if (_iDs.interstitialIds.Count > 0)
+                    {
+                        _intervalInterstitial.Value = (int)FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteInterstitialInterval).LongValue;
+                        _interstitialGroup.Value = (int)FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteInterstitialGroup).LongValue;
+                        var interstitialJson = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.allInterstitialIds).StringValue;
+                        Debug.Log(interstitialJson);
+                        if (!string.IsNullOrEmpty(interstitialJson))
+                            _iDs.interstitialIds = JsonUtility.FromJson<StringWper>(interstitialJson).list;
+                    }
                 }
 
                 if (_iDs.enableBanner)
                 {
-                    _intervalBanner.Value = (int)FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteBannerInterval).LongValue;
-                    _bannerGroup.Value = (int)FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteBannerGroup).LongValue;
-                    var bannerJson = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.allBannerIds).StringValue;
-                    Debug.Log(bannerJson);
-                    if (!string.IsNullOrEmpty(bannerJson))
-                        _iDs.bannerIds = JsonUtility.FromJson<StringWper>(bannerJson).list;
+                    if (_iDs.bannerIds.Count > 0)
+                    {
+                        _intervalBanner.Value = (int)FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteBannerInterval).LongValue;
+                        _bannerGroup.Value = (int)FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteBannerGroup).LongValue;
+                        var bannerJson = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.allBannerIds).StringValue;
+                        Debug.Log(bannerJson);
+                        if (!string.IsNullOrEmpty(bannerJson))
+                            _iDs.bannerIds = JsonUtility.FromJson<StringWper>(bannerJson).list;
+                    }
                 }
             }
             catch (Exception e)

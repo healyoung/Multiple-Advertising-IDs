@@ -41,6 +41,8 @@ namespace ShanHai.Editor
         {
             base.OnGUI(searchContext);
             using var changeCheckScope = new EditorGUI.ChangeCheckScope();
+            EditorGUILayout.PropertyField(_customSettings.FindProperty("enableBanner"));
+            EditorGUILayout.PropertyField(_customSettings.FindProperty("enableInterstitial"));
             EditorGUILayout.PropertyField(_customSettings.FindProperty("remoteInterstitialInterval"));
             EditorGUILayout.PropertyField(_customSettings.FindProperty("interstitialInterval"));
             EditorGUILayout.Space(30);
