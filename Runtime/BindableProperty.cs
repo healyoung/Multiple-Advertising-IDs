@@ -1,4 +1,5 @@
 using System;
+using Unity.Plastic.Newtonsoft.Json;
 using UnityEngine;
 
 namespace HealYoung
@@ -120,7 +121,7 @@ namespace HealYoung
         public void SetValueWithoutEvent(T newValue)
         {
             _value = newValue;
-            string value = JsonUtility.ToJson(_value);
+            string value = JsonConvert.SerializeObject(_value);
             PlayerPrefs.SetString(_key, value);
         }
 
@@ -141,7 +142,7 @@ namespace HealYoung
 
         public void SaveValue()
         {
-            string value = JsonUtility.ToJson(_value);
+            string value = JsonConvert.SerializeObject(_value);
             PlayerPrefs.SetString(_key, value);
             OnValueChanged?.Invoke(_value);
         }
@@ -159,13 +160,13 @@ namespace HealYoung
             if (PlayerPrefs.HasKey(_key))
             {
                 string value = PlayerPrefs.GetString(_key);
-                _value = JsonUtility.FromJson<T>(value);
+                _value = JsonConvert.DeserializeObject<T>(value);
             }
             else
             {
                 try
                 {
-                    string value = JsonUtility.ToJson(defaultValue);
+                    string value = JsonConvert.SerializeObject(defaultValue);
                     PlayerPrefs.SetString(_key, value);
                 }
                 catch (Exception e)
