@@ -9,8 +9,8 @@ namespace ShanHai.Editor
 {
     public class AdvertisingIDsSettingsProvider : SettingsProvider
     {
-        private const string SettingsPath = "Assets/Resources/AdvertisingIDsSettings.asset";
-        private const string HeaderName = "AdvertisingIDs/AdvertisingIDsSettings";
+        private static readonly string SettingsPath = $"Assets/Resources/{MultipleAdIds.GlobalSettingsPath}.asset";
+        private static readonly string HeaderName = $"AdvertisingIDs/{MultipleAdIds.GlobalSettingsPath}";
         private SerializedObject _customSettings;
 
         private static SerializedObject GetSerializedSettings()

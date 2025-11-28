@@ -7,16 +7,15 @@ using UnityEngine.Serialization;
 
 namespace ShanHai
 {
-    [CreateAssetMenu(fileName = "AdvertisingIDsSettings", menuName = "Multiple/AdvertisingIDsSettings", order = 1)]
+    [CreateAssetMenu(fileName = MultipleAdIds.GlobalSettingsPath, menuName = "Multiple/AdvertisingIDsSettings", order = 1)]
     public class AdvertisingIDsSettings : ScriptableObject
     {
-        
         [Header("是否启用[横幅]广告")] [SerializeField]
         public bool enableBanner = false;
-        
+
         [Header("是否启用[插屏]广告")] [SerializeField]
         public bool enableInterstitial = false;
-        
+
         [Header("云控使用的每日[横幅]广告ID的间隔的Key值,(间隔N次后，切换下一个ID)")] [SerializeField]
         public string remoteBannerInterval = "remote_banner_interval";
 
@@ -31,7 +30,7 @@ namespace ShanHai
         public string remoteBannerGroup = "remote_banner_group";
 
         [SerializeField] public int bannerGroup = 2;
-        
+
         [Header("云控使用的每日[插屏]广告组数量的Key值，(每个广告组包含N个广告ID)")] [SerializeField]
         public string remoteInterstitialGroup = "remote_interstitial_group";
 

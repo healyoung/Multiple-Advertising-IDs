@@ -8,7 +8,7 @@ namespace ShanHai
 {
     public static class MultipleAdIds
     {
-        private static readonly string GlobalSettingsPath = $"AdvertisingIDsSettings";
+        public const string GlobalSettingsPath = "AdvertisingSettings";
         private static AdvertisingIDsSettings _iDs;
         public static readonly LoginDayCounter DayCounter = new LoginDayCounter();
 
