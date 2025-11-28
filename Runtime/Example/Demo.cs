@@ -37,8 +37,7 @@ public class Demo : MonoBehaviour
     private void NextDay()
     {
         MultipleAdIds.DayCounter.LoginDay.Value++;
-        MultipleAdIds.InterstitialTimer.Value = 0;
-        MultipleAdIds.BannerTimer.Value = 0;
+        MultipleAdIds.OnNewDay();
         currentDay.text = $"第{MultipleAdIds.DayCounter.LoginDay.Value}天";
         var bannerId = MultipleAdIds.GetAdvertisingID(AdvertingType.Banner);
         currentBanner.text = bannerId;
@@ -51,12 +50,14 @@ public class Demo : MonoBehaviour
     {
         var bannerId = MultipleAdIds.GetAdvertisingID(AdvertingType.Banner);
         currentBanner.text = bannerId;
+        MultipleAdIds.ShowAdSucceed(AdvertingType.Banner);
     }
     
     private void NextInterstitial()
     {
         var interstitialId = MultipleAdIds.GetAdvertisingID(AdvertingType.Interstitial);
         currentInterstitial.text = interstitialId;
+        MultipleAdIds.ShowAdSucceed(AdvertingType.Interstitial);
     }
     
     private void ClearData()

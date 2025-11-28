@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using HealYoung;
+using ShanHai;
 using UnityEngine;
 
 public class LoginDayCounter
