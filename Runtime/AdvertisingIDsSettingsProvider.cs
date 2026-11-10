@@ -11,16 +11,19 @@ namespace ShanHai
         public const string GlobalSettingsPath = "AdvertisingSettings";
 
         /// <summary>
-        /// 当前编译目标使用的 ID 数据源，由平台宏在编译期决定。
+        /// 当前编译目标应使用的配置文件，由平台宏在编译期决定（配置文件本身不含平台宏）。
         /// @trace IOS-002
         /// </summary>
 #if UNITY_IOS
-        public const string ActiveIdSource = "IOSAdvertisingIDsConfig.cs (iOS)";
+        public const string ActiveIdSource = "IOSAdvertisingIDsConfig.asset (iOS)";
 #elif UNITY_ANDROID
-        public const string ActiveIdSource = "AdvertisingSettings.asset (Android)";
+        public const string ActiveIdSource = "AndroidAdvertisingIDsConfig.asset (Android)";
 #else
-        public const string ActiveIdSource = "AdvertisingSettings.asset (Default)";
+        public const string ActiveIdSource = "AndroidAdvertisingIDsConfig.asset (Default)";
 #endif
+
+        /// <summary>运行时实际生效的配置资产名；未创建平台配置时显示回退来源。</summary>
+        public static string ActiveConfigName { get; private set; } = "not loaded";
 
         private static AdvertisingIDsSettings _iDs;
         public static readonly LoginDayCounter DayCounter = new LoginDayCounter();
@@ -28,7 +31,7 @@ namespace ShanHai
         private static List<string> _todayBannerIds = new List<string>();
         private static List<string> _todayInterstitialIds = new List<string>();
 
-        // 平台相关的全量 ID 缓存：iOS 来自 IOSAdvertisingIDsConfig.cs，其它平台来自 AdvertisingSettings.asset
+        // 平台相关的全量 ID 缓存：来自当前平台对应的配置资产，未创建时回退 AdvertisingSettings.asset
         private static List<string> _allBannerIds;
         private static List<string> _allInterstitialIds;
 
@@ -155,7 +158,7 @@ namespace ShanHai
                 return;
             }
 
-            // 平台宏切换：iOS 读独立配置文件，Android/其它读 ScriptableObject 资产
+            // 平台宏切换：iOS 读 iOS 配置资产，Android/其它读 Android 配置资产
             LoadPlatformIds();
 
             DayCounter.LastLoginTime = new StorageProperty<int>("LoginDayCounter_LastLoginTime_V1.0.0", 0);
@@ -271,33 +274,43 @@ namespace ShanHai
         #region Helper
 
         /// <summary>
-        /// 按平台宏把全量广告 ID 载入运行时缓存。
-        /// iOS：IOSAdvertisingIDsConfig.cs；Android / 其它：AdvertisingSettings.asset。
-        /// 云控只覆盖缓存，不再改写 ScriptableObject 资产。
+        /// 按平台宏读取对应的配置资产（配置文件本身不区分平台）。
+        /// iOS：IOSAdvertisingIDsConfig.asset；Android / 其它：AndroidAdvertisingIDsConfig.asset。
+        /// 未创建平台配置资产时回退到 AdvertisingSettings.asset，保持 1.0.1 及以前的工程可用。
+        /// 云控只覆盖运行时缓存，不改写任何 ScriptableObject 资产。
         /// @trace IOS-003
         /// </summary>
         private static void LoadPlatformIds()
         {
 #if UNITY_IOS
-            LoadIosIdsFromConfig();
+            var config = FindPlatformConfig<IOSAdvertisingIDsConfig>();
 #else
+            var config = FindPlatformConfig<AndroidAdvertisingIDsConfig>();
+#endif
+            if (config != null)
+            {
+                ActiveConfigName = config.name;
+                _allBannerIds = CopyIds(config.bannerIds);
+                _allInterstitialIds = CopyIds(config.interstitialIds);
+                return;
+            }
+
+            ActiveConfigName = GlobalSettingsPath + ".asset (fallback)";
             _allBannerIds = _iDs == null ? new List<string>() : CopyIds(_iDs.bannerIds);
             _allInterstitialIds = _iDs == null ? new List<string>() : CopyIds(_iDs.interstitialIds);
-#endif
         }
 
         /// <summary>
-        /// iOS 分支实现。编辑器下同样参与编译，保证 iOS 代码在 Windows 上也能做编译验证；
-        /// Android 真机包中本方法与 IOSAdvertisingIDsConfig 均不参与编译。
+        /// 在宿主工程所有 Resources 目录下查找指定平台的配置资产，不依赖固定文件名。
         /// @trace IOS-004
         /// </summary>
-#if UNITY_IOS || UNITY_EDITOR
-        private static void LoadIosIdsFromConfig()
+        private static T FindPlatformConfig<T>() where T : AdvertisingIDsConfigBase
         {
-            _allBannerIds = CopyIds(IOSAdvertisingIDsConfig.BannerIds);
-            _allInterstitialIds = CopyIds(IOSAdvertisingIDsConfig.InterstitialIds);
+            var all = Resources.LoadAll<T>("");
+            if (all.Length > 1)
+                Debug.LogWarning($"MultipleAdIds: multiple {typeof(T).Name} assets found under Resources, using the first one.");
+            return all.Length > 0 ? all[0] : null;
         }
-#endif
 
         private static List<string> CopyIds(IReadOnlyList<string> source)
         {
