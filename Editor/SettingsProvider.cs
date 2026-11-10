@@ -41,6 +41,12 @@ namespace ShanHai.Editor
         {
             base.OnGUI(searchContext);
             using var changeCheckScope = new EditorGUI.ChangeCheckScope();
+            EditorGUILayout.HelpBox(
+                $"当前 ID 数据源：{MultipleAdIds.ActiveIdSource}\n" +
+                "iOS 端多广告 ID 请在 Runtime/IOSAdvertisingIDsConfig.cs 中逐行添加；" +
+                "开关、间隔、分组与云控 Key 仍在本面板配置。",
+                MessageType.Info);
+            EditorGUILayout.Space(10);
             EditorGUILayout.PropertyField(_customSettings.FindProperty("enableBanner"));
             EditorGUILayout.PropertyField(_customSettings.FindProperty("enableInterstitial"));
             EditorGUILayout.PropertyField(_customSettings.FindProperty("remoteInterstitialInterval"));

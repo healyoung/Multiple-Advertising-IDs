@@ -9,11 +9,28 @@ namespace ShanHai
     public static class MultipleAdIds
     {
         public const string GlobalSettingsPath = "AdvertisingSettings";
+
+        /// <summary>
+        /// 当前编译目标使用的 ID 数据源，由平台宏在编译期决定。
+        /// @trace IOS-002
+        /// </summary>
+#if UNITY_IOS
+        public const string ActiveIdSource = "IOSAdvertisingIDsConfig.cs (iOS)";
+#elif UNITY_ANDROID
+        public const string ActiveIdSource = "AdvertisingSettings.asset (Android)";
+#else
+        public const string ActiveIdSource = "AdvertisingSettings.asset (Default)";
+#endif
+
         private static AdvertisingIDsSettings _iDs;
         public static readonly LoginDayCounter DayCounter = new LoginDayCounter();
 
         private static List<string> _todayBannerIds = new List<string>();
         private static List<string> _todayInterstitialIds = new List<string>();
+
+        // 平台相关的全量 ID 缓存：iOS 来自 IOSAdvertisingIDsConfig.cs，其它平台来自 AdvertisingSettings.asset
+        private static List<string> _allBannerIds;
+        private static List<string> _allInterstitialIds;
 
         private static IBindableProperty<int> _intervalBanner;
         private static IBindableProperty<int> _intervalInterstitial;
@@ -56,14 +73,10 @@ namespace ShanHai
         /// </summary>
         public static void ReadyTodayIds(AdvertingType type)
         {
-            if (_iDs == null)
-            {
-                if (type == AdvertingType.Banner) _todayBannerIds = new List<string>();
-                else _todayInterstitialIds = new List<string>();
-                return;
-            }
+            if (_allBannerIds == null || _allInterstitialIds == null)
+                LoadPlatformIds();
 
-            var allIds = type == AdvertingType.Banner ? _iDs.bannerIds : _iDs.interstitialIds;
+            var allIds = type == AdvertingType.Banner ? _allBannerIds : _allInterstitialIds;
             int group = type == AdvertingType.Banner ? _bannerGroup : _interstitialGroup;
             group = Mathf.Max(1, group);
 
@@ -136,6 +149,14 @@ namespace ShanHai
         public static void LoadAdvertisingIDsSetting()
         {
             _iDs = GetSingletonAssetsByResources<AdvertisingIDsSettings>(GlobalSettingsPath);
+            if (_iDs == null)
+            {
+                Debug.LogError("MultipleAdIds: AdvertisingIDsSettings asset is missing, skip initialization.");
+                return;
+            }
+
+            // 平台宏切换：iOS 读独立配置文件，Android/其它读 ScriptableObject 资产
+            LoadPlatformIds();
 
             DayCounter.LastLoginTime = new StorageProperty<int>("LoginDayCounter_LastLoginTime_V1.0.0", 0);
             DayCounter.LoginDay = new StorageProperty<int>("LoginDayCounter_Day_V1.0.0", 0);
@@ -153,6 +174,15 @@ namespace ShanHai
         {
             try
             {
+                if (_iDs == null)
+                {
+                    Debug.LogWarning("MultipleAdIds: settings asset is missing, skip remote data.");
+                    return;
+                }
+
+                if (_allBannerIds == null || _allInterstitialIds == null)
+                    LoadPlatformIds();
+
                 if (_iDs.enableInterstitial)
                 {
                     var interIntervalVal = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteInterstitialInterval).LongValue;
@@ -176,7 +206,7 @@ namespace ShanHai
                         {
                             var parsed = JsonUtility.FromJson<StringWper>(interstitialJson);
                             if (parsed != null && parsed.list != null && parsed.list.Count > 0)
-                                _iDs.interstitialIds = parsed.list;
+                                _allInterstitialIds = new List<string>(parsed.list);
                         }
                         catch
                         {
@@ -208,7 +238,7 @@ namespace ShanHai
                         {
                             var parsed = JsonUtility.FromJson<StringWper>(bannerJson);
                             if (parsed != null && parsed.list != null && parsed.list.Count > 0)
-                                _iDs.bannerIds = parsed.list;
+                                _allBannerIds = new List<string>(parsed.list);
                         }
                         catch
                         {
@@ -239,6 +269,40 @@ namespace ShanHai
         }
 
         #region Helper
+
+        /// <summary>
+        /// 按平台宏把全量广告 ID 载入运行时缓存。
+        /// iOS：IOSAdvertisingIDsConfig.cs；Android / 其它：AdvertisingSettings.asset。
+        /// 云控只覆盖缓存，不再改写 ScriptableObject 资产。
+        /// @trace IOS-003
+        /// </summary>
+        private static void LoadPlatformIds()
+        {
+#if UNITY_IOS
+            LoadIosIdsFromConfig();
+#else
+            _allBannerIds = _iDs == null ? new List<string>() : CopyIds(_iDs.bannerIds);
+            _allInterstitialIds = _iDs == null ? new List<string>() : CopyIds(_iDs.interstitialIds);
+#endif
+        }
+
+        /// <summary>
+        /// iOS 分支实现。编辑器下同样参与编译，保证 iOS 代码在 Windows 上也能做编译验证；
+        /// Android 真机包中本方法与 IOSAdvertisingIDsConfig 均不参与编译。
+        /// @trace IOS-004
+        /// </summary>
+#if UNITY_IOS || UNITY_EDITOR
+        private static void LoadIosIdsFromConfig()
+        {
+            _allBannerIds = CopyIds(IOSAdvertisingIDsConfig.BannerIds);
+            _allInterstitialIds = CopyIds(IOSAdvertisingIDsConfig.InterstitialIds);
+        }
+#endif
+
+        private static List<string> CopyIds(IReadOnlyList<string> source)
+        {
+            return source == null ? new List<string>() : new List<string>(source);
+        }
 
         private static T GetSingletonAssetsByResources<T>(string assetsPath) where T : ScriptableObject, new()
         {
