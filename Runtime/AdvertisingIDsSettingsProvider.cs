@@ -26,12 +26,13 @@ namespace ShanHai
         public static string ActiveConfigName { get; private set; } = "not loaded";
 
         private static AdvertisingIDsSettings _iDs;
+        private static ActiveAdConfig _config;
         public static readonly LoginDayCounter DayCounter = new LoginDayCounter();
 
         private static List<string> _todayBannerIds = new List<string>();
         private static List<string> _todayInterstitialIds = new List<string>();
 
-        // 平台相关的全量 ID 缓存：来自当前平台对应的配置资产，未创建时回退 AdvertisingSettings.asset
+        // 全量 ID 缓存：来自当前平台生效的配置，云控只覆盖缓存、不改写任何资产
         private static List<string> _allBannerIds;
         private static List<string> _allInterstitialIds;
 
@@ -151,58 +152,67 @@ namespace ShanHai
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         public static void LoadAdvertisingIDsSetting()
         {
-            _iDs = GetSingletonAssetsByResources<AdvertisingIDsSettings>(GlobalSettingsPath);
-            if (_iDs == null)
+            _iDs = LoadLegacySettings();
+            ResolveConfig();
+            if (_config == null)
             {
-                Debug.LogError("MultipleAdIds: AdvertisingIDsSettings asset is missing, skip initialization.");
+                Debug.LogError("MultipleAdIds: no advertising config found. Create a platform config (Create > Multiple) or Assets/Resources/AdvertisingSettings.asset.");
                 return;
             }
-
-            // 平台宏切换：iOS 读 iOS 配置资产，Android/其它读 Android 配置资产
-            LoadPlatformIds();
 
             DayCounter.LastLoginTime = new StorageProperty<int>("LoginDayCounter_LastLoginTime_V1.0.0", 0);
             DayCounter.LoginDay = new StorageProperty<int>("LoginDayCounter_Day_V1.0.0", 0);
             DayCounter.UpdateLastLoginTime();
 
-            _intervalInterstitial = new StorageProperty<int>("Interstitial_IntervalM_V1.0.0", _iDs.interstitialInterval);
-            _intervalBanner = new StorageProperty<int>("Banner_IntervalN_V1.0.0", _iDs.bannerInterval);
+            _intervalInterstitial = new StorageProperty<int>("Interstitial_IntervalM_V1.0.0", _config.InterstitialInterval);
+            _intervalBanner = new StorageProperty<int>("Banner_IntervalN_V1.0.0", _config.BannerInterval);
 
-            _interstitialGroup =  _iDs.interstitialGroup;
-            _bannerGroup = _iDs.bannerGroup;
+            _interstitialGroup = _config.InterstitialGroup;
+            _bannerGroup = _config.BannerGroup;
             OnNewDay();
         }
 
+        /// <summary>
+        /// 读取 Firebase Remote Config 已激活的值并按「当前平台生效的配置」中的 Key 应用。
+        /// 云控 Key、开关、间隔、分组都取自对应平台的配置资产，不再共用 AdvertisingSettings.asset。
+        /// @trace IOS-010
+        /// </summary>
         public static void SetRemoteData()
         {
             try
             {
-                if (_iDs == null)
+                // 允许业务层在 Firebase 就绪后较早调用：确保初始化与平台配置都已解析
+                if (DayCounter.LoginDay == null || _intervalBanner == null || _intervalInterstitial == null || _config == null)
                 {
-                    Debug.LogWarning("MultipleAdIds: settings asset is missing, skip remote data.");
+                    Debug.LogWarning("MultipleAdIds: SetRemoteData called before initialization, running initialization first.");
+                    LoadAdvertisingIDsSetting();
+                }
+
+                if (_config == null)
+                {
+                    Debug.LogWarning("MultipleAdIds: no advertising config found, skip remote data.");
                     return;
                 }
 
                 if (_allBannerIds == null || _allInterstitialIds == null)
                     LoadPlatformIds();
 
-                if (_iDs.enableInterstitial)
+                if (_config.EnableInterstitial)
                 {
-                    var interIntervalVal = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteInterstitialInterval).LongValue;
-                    var interGroupVal = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteInterstitialGroup).LongValue;
+                    var interIntervalVal = FirebaseRemoteConfig.DefaultInstance.GetValue(_config.RemoteInterstitialInterval).LongValue;
+                    var interGroupVal = FirebaseRemoteConfig.DefaultInstance.GetValue(_config.RemoteInterstitialGroup).LongValue;
 
                     if (interIntervalVal > 0)
                         _intervalInterstitial.Value = (int)interIntervalVal;
                     else
-                        _intervalInterstitial.Value = Mathf.Max(1, _iDs.interstitialInterval);
+                        _intervalInterstitial.Value = Mathf.Max(1, _config.InterstitialInterval);
 
                     if (interGroupVal > 0)
                         _interstitialGroup = (int)interGroupVal;
                     else
-                        _interstitialGroup = Mathf.Max(1, _iDs.interstitialGroup);
+                        _interstitialGroup = Mathf.Max(1, _config.InterstitialGroup);
 
-                    var interstitialJson = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.allInterstitialIds).StringValue;
-                    Debug.Log(interstitialJson);
+                    var interstitialJson = FirebaseRemoteConfig.DefaultInstance.GetValue(_config.AllInterstitialIds).StringValue;
                     if (!string.IsNullOrEmpty(interstitialJson))
                     {
                         try
@@ -218,23 +228,22 @@ namespace ShanHai
                     }
                 }
 
-                if (_iDs.enableBanner)
+                if (_config.EnableBanner)
                 {
-                    var bannerIntervalVal = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteBannerInterval).LongValue;
-                    var bannerGroupVal = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.remoteBannerGroup).LongValue;
+                    var bannerIntervalVal = FirebaseRemoteConfig.DefaultInstance.GetValue(_config.RemoteBannerInterval).LongValue;
+                    var bannerGroupVal = FirebaseRemoteConfig.DefaultInstance.GetValue(_config.RemoteBannerGroup).LongValue;
 
                     if (bannerIntervalVal > 0)
                         _intervalBanner.Value = (int)bannerIntervalVal;
                     else
-                        _intervalBanner.Value = Mathf.Max(1, _iDs.bannerInterval);
+                        _intervalBanner.Value = Mathf.Max(1, _config.BannerInterval);
 
                     if (bannerGroupVal > 0)
                         _bannerGroup = (int)bannerGroupVal;
                     else
-                        _bannerGroup = Mathf.Max(1, _iDs.bannerGroup);
+                        _bannerGroup = Mathf.Max(1, _config.BannerGroup);
 
-                    var bannerJson = FirebaseRemoteConfig.DefaultInstance.GetValue(_iDs.allBannerIds).StringValue;
-                    Debug.Log(bannerJson);
+                    var bannerJson = FirebaseRemoteConfig.DefaultInstance.GetValue(_config.AllBannerIds).StringValue;
                     if (!string.IsNullOrEmpty(bannerJson))
                     {
                         try
@@ -274,30 +283,104 @@ namespace ShanHai
         #region Helper
 
         /// <summary>
-        /// 按平台宏读取对应的配置资产（配置文件本身不区分平台）。
-        /// iOS：IOSAdvertisingIDsConfig.asset；Android / 其它：AndroidAdvertisingIDsConfig.asset。
-        /// 未创建平台配置资产时回退到 AdvertisingSettings.asset，保持 1.0.1 及以前的工程可用。
-        /// 云控只覆盖运行时缓存，不改写任何 ScriptableObject 资产。
+        /// 运行时配置快照：平台配置资产与旧 AdvertisingSettings.asset 在这里归一，
+        /// 后续所有参数与云控读取都只依赖此快照。
+        /// </summary>
+        private sealed class ActiveAdConfig
+        {
+            public string SourceName;
+            public bool EnableBanner;
+            public bool EnableInterstitial;
+            public int BannerInterval;
+            public int InterstitialInterval;
+            public int BannerGroup;
+            public int InterstitialGroup;
+            public string RemoteBannerInterval;
+            public string RemoteInterstitialInterval;
+            public string RemoteBannerGroup;
+            public string RemoteInterstitialGroup;
+            public string AllBannerIds;
+            public string AllInterstitialIds;
+            public List<string> BannerIds;
+            public List<string> InterstitialIds;
+        }
+
+        /// <summary>
+        /// 按平台宏解析生效配置：参数与云控 Key 全部来自当前平台的配置资产；
+        /// 未创建平台资产时回退 1.0.0 的 AdvertisingSettings.asset，保持旧工程可用。
+        /// @trace IOS-009
+        /// </summary>
+        private static void ResolveConfig()
+        {
+#if UNITY_IOS
+            var platformConfig = FindPlatformConfig<IOSAdvertisingIDsConfig>();
+#else
+            var platformConfig = FindPlatformConfig<AndroidAdvertisingIDsConfig>();
+#endif
+            if (platformConfig != null)
+                _config = FromPlatformConfig(platformConfig);
+            else if (_iDs != null)
+                _config = FromLegacySettings(_iDs);
+            else
+                _config = null;
+
+            ActiveConfigName = _config == null ? "none" : _config.SourceName;
+        }
+
+        private static ActiveAdConfig FromPlatformConfig(AdvertisingIDsConfigBase c)
+        {
+            return new ActiveAdConfig
+            {
+                SourceName = c.name,
+                EnableBanner = c.enableBanner,
+                EnableInterstitial = c.enableInterstitial,
+                BannerInterval = c.bannerInterval,
+                InterstitialInterval = c.interstitialInterval,
+                BannerGroup = c.bannerGroup,
+                InterstitialGroup = c.interstitialGroup,
+                RemoteBannerInterval = c.remoteBannerInterval,
+                RemoteInterstitialInterval = c.remoteInterstitialInterval,
+                RemoteBannerGroup = c.remoteBannerGroup,
+                RemoteInterstitialGroup = c.remoteInterstitialGroup,
+                AllBannerIds = c.allBannerIds,
+                AllInterstitialIds = c.allInterstitialIds,
+                BannerIds = CopyIds(c.bannerIds),
+                InterstitialIds = CopyIds(c.interstitialIds)
+            };
+        }
+
+        private static ActiveAdConfig FromLegacySettings(AdvertisingIDsSettings s)
+        {
+            return new ActiveAdConfig
+            {
+                SourceName = GlobalSettingsPath + ".asset (fallback)",
+                EnableBanner = s.enableBanner,
+                EnableInterstitial = s.enableInterstitial,
+                BannerInterval = s.bannerInterval,
+                InterstitialInterval = s.interstitialInterval,
+                BannerGroup = s.bannerGroup,
+                InterstitialGroup = s.interstitialGroup,
+                RemoteBannerInterval = s.remoteBannerInterval,
+                RemoteInterstitialInterval = s.remoteInterstitialInterval,
+                RemoteBannerGroup = s.remoteBannerGroup,
+                RemoteInterstitialGroup = s.remoteInterstitialGroup,
+                AllBannerIds = s.allBannerIds,
+                AllInterstitialIds = s.allInterstitialIds,
+                BannerIds = CopyIds(s.bannerIds),
+                InterstitialIds = CopyIds(s.interstitialIds)
+            };
+        }
+
+        /// <summary>
+        /// 把当前平台生效配置的全量 ID 载入运行时缓存。
+        /// 云控只覆盖缓存，不改写任何 ScriptableObject 资产。
         /// @trace IOS-003
         /// </summary>
         private static void LoadPlatformIds()
         {
-#if UNITY_IOS
-            var config = FindPlatformConfig<IOSAdvertisingIDsConfig>();
-#else
-            var config = FindPlatformConfig<AndroidAdvertisingIDsConfig>();
-#endif
-            if (config != null)
-            {
-                ActiveConfigName = config.name;
-                _allBannerIds = CopyIds(config.bannerIds);
-                _allInterstitialIds = CopyIds(config.interstitialIds);
-                return;
-            }
-
-            ActiveConfigName = GlobalSettingsPath + ".asset (fallback)";
-            _allBannerIds = _iDs == null ? new List<string>() : CopyIds(_iDs.bannerIds);
-            _allInterstitialIds = _iDs == null ? new List<string>() : CopyIds(_iDs.interstitialIds);
+            if (_config == null) ResolveConfig();
+            _allBannerIds = _config == null ? new List<string>() : CopyIds(_config.BannerIds);
+            _allInterstitialIds = _config == null ? new List<string>() : CopyIds(_config.InterstitialIds);
         }
 
         /// <summary>
@@ -315,6 +398,13 @@ namespace ShanHai
         private static List<string> CopyIds(IReadOnlyList<string> source)
         {
             return source == null ? new List<string>() : new List<string>(source);
+        }
+
+        /// <summary>静默加载旧版设置：只有平台配置、没有旧资产时也属正常，不报错。</summary>
+        private static AdvertisingIDsSettings LoadLegacySettings()
+        {
+            CollectAssets(typeof(AdvertisingIDsSettings).Name);
+            return Resources.Load<AdvertisingIDsSettings>(GlobalSettingsPath);
         }
 
         private static T GetSingletonAssetsByResources<T>(string assetsPath) where T : ScriptableObject, new()

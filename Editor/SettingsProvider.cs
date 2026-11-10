@@ -75,9 +75,9 @@ namespace ShanHai.Editor
             EditorGUILayout.HelpBox(
                 $"编译目标应使用的配置：{MultipleAdIds.ActiveIdSource}\n" +
                 $"运行时实际生效：{MultipleAdIds.ActiveConfigName}\n" +
-                "Android / iOS 两种配置文件都可在 Create > Multiple 下创建，也能用下方按钮一键创建；" +
-                "资产放在任意 Resources 目录下，各自填入多个 ID 即可。未创建时回退使用本面板的 ID 列表。" +
-                "开关、间隔、分组与云控 Key 仍在本面板配置。",
+                "Android / iOS 两份配置各自包含完整参数：开关、云控 Key（间隔 / 分组 / 所有 ID）、" +
+                "本地间隔与分组、以及各自的广告 ID 列表。用下方按钮创建或选中资产后，在 Inspector 里分别填写，" +
+                "两端云控 ID 互不影响。本面板的 AdvertisingSettings.asset 仅在未创建平台配置时作为回退。",
                 MessageType.Info);
             EditorGUILayout.Space(10);
             EditorGUILayout.BeginHorizontal();
